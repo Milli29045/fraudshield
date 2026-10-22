@@ -712,3 +712,9 @@ a {
     align-items: flex-start;
   }
 }
+/* Netlify badge hiding style */
+.netlify-badge,
+[data-netlify-badge],
+div[class*="netlify"] {
+  display: none !important;
+}

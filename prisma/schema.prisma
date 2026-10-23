@@ -8,11 +8,13 @@ datasource db {
   provider = "postgresql"
 }
 
+
 model App {
   id          Int      @id @default(autoincrement())
   name        String
   description String?
   category    String?
+  fraudStatus String   @default("Pending")
   createdAt   DateTime @default(now())
   reviews     Review[]
 }
@@ -27,4 +29,13 @@ model Review {
 
   appId Int
   app   App @relation(fields: [appId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         String   @default("user")
+  createdAt    DateTime @default(now())
 }

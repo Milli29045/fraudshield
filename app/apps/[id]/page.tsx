@@ -1,7 +1,6 @@
-
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 
@@ -28,7 +27,7 @@ type Review = {
   };
 };
 
-export default function AppDetailsPage() {
+function AppDetailsContent() {
   const params = useParams<{ id: string }>();
   const appId = Number(params.id);
 
@@ -109,6 +108,122 @@ export default function AppDetailsPage() {
   };
 
   return (
+    <div style={{ maxWidth: "900px", margin: "0 auto" }}>
+      <Link
+        href="/apps"
+        style={{ color: "#4f46e5", textDecoration: "none" }}
+      >
+        ← Back to Apps
+      </Link>
+
+      {loading && <p style={{ marginTop: "20px" }}>Loading app details...</p>}
+
+      {error && (
+        <p role="alert" style={{ color: "#b91c1c", marginTop: "20px" }}>
+          {error}
+        </p>
+      )}
+
+      {!loading && !error && app && (
+        <>
+          <header style={{ margin: "28px 0" }}>
+            <p
+              style={{
+                color: "#4f46e5",
+                fontWeight: "bold",
+                letterSpacing: "1px",
+              }}
+            >
+              FRAUDSHIELD
+            </p>
+
+            <h1 style={{ fontSize: "32px", margin: "8px 0" }}>
+              {app.name}
+            </h1>
+
+            <p style={{ color: "#64748b", lineHeight: 1.7 }}>
+              {app.description || "No description available."}
+            </p>
+
+            <p>
+              <strong>Category:</strong>{" "}
+              {app.category || "Uncategorized"}
+            </p>
+
+            <p>
+              <strong>Verification Status:</strong>{" "}
+              <span
+                style={{
+                  ...statusColor,
+                  padding: "5px 10px",
+                  borderRadius: "20px",
+                  fontSize: "13px",
+                  fontWeight: "bold",
+                }}
+              >
+                {app.fraudStatus}
+              </span>
+            </p>
+
+            <p>
+              <strong>Total Reviews:</strong> {reviews.length}
+            </p>
+
+            <p style={{ color: "#64748b", fontSize: "13px" }}>
+              Added on{" "}
+              {new Date(app.createdAt).toLocaleDateString("en-US")}
+            </p>
+          </header>
+
+          <section>
+            <h2 style={{ fontSize: "24px", marginBottom: "18px" }}>
+              User Reviews
+            </h2>
+
+            {reviews.length === 0 && (
+              <div style={cardStyle}>
+                No reviews have been submitted for this app yet.
+              </div>
+            )}
+
+            {reviews.map((review) => (
+              <article key={review.id} style={cardStyle}>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    flexWrap: "wrap",
+                    gap: "10px",
+                  }}
+                >
+                  <strong>Review #{review.id}</strong>
+                  <span style={{ color: "#64748b" }}>
+                    {review.sentiment || "Not analyzed"}
+                  </span>
+                </div>
+
+                <p style={{ lineHeight: 1.7, overflowWrap: "anywhere" }}>
+                  {review.content}
+                </p>
+
+                <p style={{ color: "#64748b", fontSize: "13px" }}>
+                  Status: {review.status}
+                </p>
+
+                <p style={{ color: "#64748b", fontSize: "13px" }}>
+                  {new Date(review.createdAt).toLocaleString("en-US")}
+                </p>
+              </article>
+            ))}
+          </section>
+        </>
+      )}
+    </div>
+  );
+}
+
+export default function AppDetailsPage() {
+  return (
     <main
       style={{
         minHeight: "100vh",
@@ -118,117 +233,9 @@ export default function AppDetailsPage() {
         color: "#111827",
       }}
     >
-      <div style={{ maxWidth: "900px", margin: "0 auto" }}>
-        <Link
-          href="/apps"
-          style={{ color: "#4f46e5", textDecoration: "none" }}
-        >
-          ← Back to Apps
-        </Link>
-
-        {loading && <p>Loading app details...</p>}
-
-        {error && (
-          <p role="alert" style={{ color: "#b91c1c", marginTop: "20px" }}>
-            {error}
-          </p>
-        )}
-
-        {!loading && !error && app && (
-          <>
-            <header style={{ margin: "28px 0" }}>
-              <p
-                style={{
-                  color: "#4f46e5",
-                  fontWeight: "bold",
-                  letterSpacing: "1px",
-                }}
-              >
-                FRAUDSHIELD
-              </p>
-
-              <h1 style={{ fontSize: "32px", margin: "8px 0" }}>
-                {app.name}
-              </h1>
-
-              <p style={{ color: "#64748b", lineHeight: 1.7 }}>
-                {app.description || "No description available."}
-              </p>
-
-              <p>
-                <strong>Category:</strong>{" "}
-                {app.category || "Uncategorized"}
-              </p>
-
-              <p>
-                <strong>Verification Status:</strong>{" "}
-                <span
-                  style={{
-                    ...statusColor,
-                    padding: "5px 10px",
-                    borderRadius: "20px",
-                    fontSize: "13px",
-                    fontWeight: "bold",
-                  }}
-                >
-                  {app.fraudStatus}
-                </span>
-              </p>
-
-              <p>
-                <strong>Total Reviews:</strong> {reviews.length}
-              </p>
-
-              <p style={{ color: "#64748b", fontSize: "13px" }}>
-                Added on{" "}
-                {new Date(app.createdAt).toLocaleDateString("en-US")}
-              </p>
-            </header>
-
-            <section>
-              <h2 style={{ fontSize: "24px", marginBottom: "18px" }}>
-                User Reviews
-              </h2>
-
-              {reviews.length === 0 && (
-                <div style={cardStyle}>
-                  No reviews have been submitted for this app yet.
-                </div>
-              )}
-
-              {reviews.map((review) => (
-                <article key={review.id} style={cardStyle}>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      flexWrap: "wrap",
-                      gap: "10px",
-                    }}
-                  >
-                    <strong>Review #{review.id}</strong>
-                    <span style={{ color: "#64748b" }}>
-                      {review.sentiment || "Not analyzed"}
-                    </span>
-                  </div>
-
-                  <p style={{ lineHeight: 1.7, overflowWrap: "anywhere" }}>
-                    {review.content}
-                  </p>
-
-                  <p style={{ color: "#64748b", fontSize: "13px" }}>
-                    Status: {review.status}
-                  </p>
-
-                  <p style={{ color: "#64748b", fontSize: "13px" }}>
-                    {new Date(review.createdAt).toLocaleString("en-US")}
-                  </p>
-                </article>
-              ))}
-            </section>
-          </>
-        )}
-      </div>
+      <Suspense fallback={<div style={{ maxWidth: "900px", margin: "0 auto" }}>Loading app details...</div>}>
+        <AppDetailsContent />
+      </Suspense>
     </main>
   );
 }

@@ -2,10 +2,13 @@
 import { NextResponse } from "next/server";
 import { prisma } from "../../lib/prisma";
 import { analyzeSentiment } from "../../lib/sentiment";
-
-
+import { requireAdmin } from "../../lib/auth";
+import { getCurrentUser } from "../../lib/auth";
 export async function GET(request: Request) {
   try {
+    const user = await getCurrentUser();
+
+const isAdmin = user?.role === "admin";
     const { searchParams } = new URL(request.url);
     const appIdParam = searchParams.get("appId");
 
@@ -23,7 +26,10 @@ export async function GET(request: Request) {
     }
 
     const reviews = await prisma.review.findMany({
-      where: appId !== undefined ? { appId } : undefined,
+     where: {
+  ...(appId !== undefined ? { appId } : {}),
+  ...(isAdmin ? {} : { status: "approved" }),
+},
       include: {
         app: {
           select: {
@@ -49,6 +55,15 @@ export async function GET(request: Request) {
 
 
 export async function POST(request: Request) {
+                                             
+  const user = await getCurrentUser();
+
+  if (!user) {
+    return NextResponse.json(
+      { error: "Please login before submitting a review." },
+      { status: 401 }
+    );
+  }
   try {
     const body = await request.json();
 
@@ -108,6 +123,11 @@ const review = await prisma.review.create({
 }
 
 export async function PATCH(request: Request) {
+   const auth = await requireAdmin();
+
+  if (auth.response) {
+    return auth.response;
+  }
   try {
     const body = await request.json();
     const id = Number(body.id);

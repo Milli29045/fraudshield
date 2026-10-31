@@ -1,6 +1,6 @@
 
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
-
+@import "tailwindcss";
 :root {
   --navy: #101b3d;
   --blue: #4169f5;
@@ -776,5 +776,461 @@ div[class*="netlify"] {
     flex-wrap: wrap;
     justify-content: center;
     gap: 12px 18px;
+  }
+}
+
+/* Navbar authenticated user styling */
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.nav-actions .nav-button {
+  font-family: inherit;
+  white-space: nowrap;
+}
+
+.nav-user-name {
+  color: var(--navy);
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.nav-actions button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+@media (max-width: 650px) {
+  .nav-user-name {
+    font-size: 12px;
+  }
+
+  .nav-actions {
+    gap: 8px;
+  }
+}
+
+/* ===== Premium FraudShield Navbar ===== */
+
+.navbar {
+  position: relative;
+  z-index: 100;
+  min-height: 94px;
+  padding: 16px 3%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 22px;
+  background: rgba(255, 255, 255, 0.96);
+  border-bottom: 1px solid #e8edff;
+  box-shadow: 0 8px 28px rgba(30, 55, 120, 0.06);
+}
+
+.brand {
+  font-size: 27px;
+  flex-shrink: 0;
+}
+
+.brand-icon {
+  font-size: 31px;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 19px;
+  flex: 1;
+  color: #17254c;
+}
+
+.nav-item {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 12px 2px;
+  color: #263452;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: 0.2s ease;
+}
+
+.nav-item:hover,
+.nav-item.active {
+  color: #2454e8;
+}
+
+.nav-item.active::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  border-radius: 5px;
+  background: #2454e8;
+}
+
+.nav-icon {
+  font-size: 19px;
+  font-weight: 700;
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  flex-shrink: 0;
+}
+
+.welcome-capsule {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 17px;
+  border-radius: 30px;
+  background: #edf2ff;
+  color: #1744c5;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.welcome-capsule strong {
+  color: #142654;
+}
+
+.welcome-shield {
+  width: 29px;
+  height: 29px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #2454e8;
+  color: white;
+  font-weight: 800;
+}
+
+.logout-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 49px;
+  padding: 0 23px;
+  border: none;
+  border-radius: 13px;
+  background: linear-gradient(135deg, #315ff4, #142e9c);
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 6px 16px rgba(37, 78, 220, 0.22);
+  transition: 0.2s ease;
+}
+
+.logout-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 9px 20px rgba(37, 78, 220, 0.3);
+}
+
+.logout-button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.nav-loading {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.admin-link {
+  color: #2454e8;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* Responsive Navbar */
+
+@media (max-width: 1200px) {
+  .navbar {
+    flex-wrap: wrap;
+  }
+
+  .nav-links {
+    order: 3;
+    flex-basis: 100%;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 650px) {
+  .navbar {
+    padding: 14px 5%;
+    gap: 13px;
+  }
+
+  .brand {
+    font-size: 23px;
+  }
+
+  .nav-links {
+    gap: 12px 18px;
+  }
+
+  .nav-item {
+    font-size: 12px;
+  }
+
+  .nav-actions {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .welcome-capsule {
+    padding: 9px 12px;
+    font-size: 11px;
+  }
+
+  .logout-button {
+    min-height: 40px;
+    padding: 0 14px;
+    font-size: 12px;
+  }
+}
+
+
+/* FraudShield Clean Premium Navbar */
+
+.navbar {
+  min-height: 82px;
+  padding: 12px 4%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  background: #ffffff;
+  border-bottom: 1px solid #e8edff;
+  box-shadow: 0 4px 18px rgba(16, 27, 61, 0.05);
+}
+
+.brand {
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  gap: clamp(10px, 1.3vw, 22px);
+  min-width: 0;
+  color: #566078;
+}
+
+.nav-item {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 0;
+  color: #34415e;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: 0.2s ease;
+}
+
+.nav-item:hover,
+.nav-item.active {
+  color: #4169f5;
+}
+
+.nav-item.active {
+  border-bottom: 2px solid #4169f5;
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.welcome-capsule {
+  padding: 12px 15px;
+  border-radius: 25px;
+  background: #edf2ff;
+  color: #3155c9;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.welcome-capsule strong {
+  color: #101b3d;
+}
+
+.logout-button {
+  min-height: 43px;
+  padding: 10px 19px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+
+@media (max-width: 1100px) {
+  .navbar {
+    flex-wrap: wrap;
+  }
+
+  .nav-links {
+    order: 3;
+    flex-basis: 100%;
+    flex-wrap: wrap;
+    gap: 10px 22px;
+  }
+}
+
+@media (max-width: 650px) {
+  .navbar {
+    padding: 14px 5%;
+  }
+
+  .nav-links {
+    justify-content: flex-start;
+  }
+
+  .nav-actions {
+    flex-wrap: wrap;
+  }
+
+  .welcome-capsule {
+    font-size: 11px;
+    padding: 9px 11px;
+  }
+}
+.nav-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.welcome-capsule {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.logout-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+}
+
+/* Remove active blue color and underline from Navbar */
+
+.nav-item.active {
+  color: #34415e !important;
+  border-bottom: none !important;
+}
+
+.nav-item.active::after {
+  display: none !important;
+}
+
+.nav-item:hover {
+  color: #34415e;
+}
+/* Navbar hover effect for all navigation links */
+
+.nav-item,
+.nav-item.active {
+  color: #34415e;
+  border-bottom: none !important;
+  transition: color 0.2s ease;
+}
+
+.nav-item:hover,
+.nav-item.active:hover {
+  color: #4169f5 !important;
+}
+
+.nav-item.active::after {
+  display: none !important;
+}
+/* Navbar hover effect for all navigation links */
+
+.nav-item,
+.nav-item.active {
+  color: #34415e;
+  border-bottom: none !important;
+  transition: color 0.2s ease;
+}
+
+.nav-item:hover,
+.nav-item.active:hover {
+  color: #4169f5 !important;
+}
+
+.nav-item.active::after {
+  display: none !important;
+}
+/* Responsive Navbar */
+@media (max-width: 1024px) {
+  .navbar {
+    padding: 14px 20px;
+    gap: 16px;
+  }
+
+  .nav-links {
+    gap: 14px;
+  }
+
+  .nav-item {
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    flex-wrap: wrap;
+    padding: 14px 16px;
+  }
+
+  .brand {
+    font-size: 20px;
+  }
+
+  .nav-links {
+    order: 3;
+    width: 100%;
+    overflow-x: auto;
+    justify-content: flex-start;
+    gap: 20px;
+    padding: 12px 0 5px;
+    scrollbar-width: none;
+  }
+
+  .nav-links::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav-item {
+    flex-shrink: 0;
+    font-size: 13px;
+  }
+
+  .nav-actions {
+    margin-left: auto;
+    gap: 10px;
   }
 }

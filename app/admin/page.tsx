@@ -184,7 +184,7 @@ export default function AdminPage() {
             FraudShield Admin Panel
           </h1>
           <p style={{ color: "#64748b", lineHeight: 1.6 }}>
-            Apps classify karein aur submitted reviews moderate karein.
+          Manage app classifications and moderate submitted reviews.
           </p>
 
           <button

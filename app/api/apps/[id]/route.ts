@@ -1,6 +1,7 @@
 
 import { NextResponse } from "next/server";
 import { prisma } from "../../../lib/prisma";
+import { requireAdmin } from "../../../lib/auth";
 
 type RouteContext = {
   params: Promise<{ id: string }>;
@@ -10,6 +11,13 @@ export async function PATCH(
   request: Request,
   { params }: RouteContext
 ) {
+  // Only admins can change app classification.
+  const auth = await requireAdmin();
+
+  if (auth.response) {
+    return auth.response;
+  }
+
   try {
     const { id: rawId } = await params;
     const id = Number(rawId);

@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type FormEvent } from "react";
 
 type AppItem = {
   id: number;
@@ -34,7 +34,16 @@ const buttonStyle = {
   cursor: "pointer",
   fontWeight: 600,
 };
-
+const formInputStyle = {
+  display: "block",
+  width: "100%",
+  boxSizing: "border-box" as const,
+  padding: "12px",
+  marginBottom: "14px",
+  border: "1px solid #cbd5e1",
+  borderRadius: "8px",
+  fontSize: "15px",
+};
 export default function AdminPage() {
   const [apps, setApps] = useState<AppItem[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -43,6 +52,11 @@ export default function AdminPage() {
   const [message, setMessage] = useState("");
   const [updatingId, setUpdatingId] = useState<number | null>(null);
   const [updatingAppId, setUpdatingAppId] = useState<number | null>(null);
+  const [appName, setAppName] = useState("");
+  const [appDescription, setAppDescription] = useState("");
+  const [appCategory, setAppCategory] = useState("");
+  const [appStatus, setAppStatus] = useState("Pending");
+  const [addingApp, setAddingApp] = useState(false);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -58,18 +72,18 @@ export default function AdminPage() {
       const reviewsData = await reviewsResponse.json();
 
       if (!appsResponse.ok) {
-        throw new Error(appsData.error || "Apps load nahi huin.");
+        throw new Error(appsData.error || "Unable to load apps.");
       }
 
       if (!reviewsResponse.ok) {
-        throw new Error(reviewsData.error || "Reviews load nahi hue.");
+        throw new Error(reviewsData.error || "Unable to load reviews.");
       }
 
       setApps(appsData.apps);
       setReviews(reviewsData.reviews);
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Koi error aa gaya."
+        err instanceof Error ? err.message : "Something went wrong."
       );
     } finally {
       setLoading(false);
@@ -97,14 +111,14 @@ export default function AdminPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Review status update nahi hua.");
+        throw new Error(data.error || "Unable to update review status.");
       }
 
-      setMessage(`Review #${id} ${status} ho gaya.`);
+      setMessage(`Review #${id} has been ${status}.`);
       await loadData();
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Koi error aa gaya."
+        err instanceof Error ? err.message : "Something went wrong."
       );
     } finally {
       setUpdatingId(null);
@@ -128,7 +142,7 @@ export default function AdminPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "App status update nahi hua.");
+        throw new Error(data.error || "Unable to update app status.");
       }
 
       setApps((currentApps) =>
@@ -137,15 +151,65 @@ export default function AdminPage() {
         )
       );
 
-      setMessage(`${data.app.name} ka status ${fraudStatus} ho gaya.`);
+      setMessage(`${data.app.name} status has been updated to ${fraudStatus}.`);
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Koi error aa gaya."
+        err instanceof Error ? err.message : "Something went wrong."
       );
     } finally {
       setUpdatingAppId(null);
     }
   }
+
+async function addApp(event: FormEvent<HTMLFormElement>) {
+  event.preventDefault();
+
+  setError("");
+  setMessage("");
+
+  if (!appName.trim()) {
+    setError("Please enter an app name.");
+    return;
+  }
+
+  setAddingApp(true);
+
+  try {
+    const response = await fetch("/api/apps", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name: appName.trim(),
+        description: appDescription.trim(),
+        category: appCategory.trim(),
+        fraudStatus: appStatus,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Unable to add app.");
+    }
+
+    setAppName("");
+    setAppDescription("");
+    setAppCategory("");
+    setAppStatus("Pending");
+
+    setMessage(`${data.app.name} added successfully.`);
+
+    await loadData();
+  } catch (err) {
+    setError(
+      err instanceof Error ? err.message : "Unable to add app."
+    );
+  } finally {
+    setAddingApp(false);
+  }
+}
 
   const cardStyle = {
     background: "#ffffff",
@@ -233,9 +297,71 @@ export default function AdminPage() {
           <h2 style={{ fontSize: "24px", marginBottom: "16px" }}>
             App Management
           </h2>
+          
+<form
+  onSubmit={addApp}
+  style={{
+    background: "#ffffff",
+    border: "1px solid #e2e8f0",
+    borderRadius: "14px",
+    padding: "22px",
+    marginBottom: "20px",
+  }}
+>
+  <h3 style={{ fontSize: "20px", marginBottom: "16px" }}>
+    Add New App
+  </h3>
+
+  <input
+    value={appName}
+    onChange={(e) => setAppName(e.target.value)}
+    placeholder="App Name"
+    maxLength={150}
+    required
+    style={formInputStyle}
+  />
+
+  <textarea
+    value={appDescription}
+    onChange={(e) => setAppDescription(e.target.value)}
+    placeholder="App Description"
+    rows={3}
+    style={formInputStyle}
+  />
+
+  <input
+    value={appCategory}
+    onChange={(e) => setAppCategory(e.target.value)}
+    placeholder="Category (e.g. Social Media, Finance)"
+    style={formInputStyle}
+  />
+
+  <select
+    value={appStatus}
+    onChange={(e) => setAppStatus(e.target.value)}
+    style={formInputStyle}
+  >
+    <option value="Pending">Pending</option>
+    <option value="Genuine">Genuine</option>
+    <option value="Fraud">Fraud</option>
+  </select>
+
+  <button
+    type="submit"
+    disabled={addingApp}
+    style={{
+      ...buttonStyle,
+      background: "#4f46e5",
+      opacity: addingApp ? 0.6 : 1,
+    }}
+  >
+    {addingApp ? "Adding App..." : "Add App"}
+  </button>
+</form>
+
 
           {!loading && apps.length === 0 && (
-            <p>Koi app database mein available nahi hai.</p>
+            <p>No apps are available.</p>
           )}
 
           {apps.map((app) => (
@@ -352,7 +478,7 @@ export default function AdminPage() {
           </h2>
 
           {!loading && reviews.length === 0 && (
-            <p>Koi review available nahi hai.</p>
+            <p>No reviews are available.</p>
           )}
 
           {reviews.map((review) => (

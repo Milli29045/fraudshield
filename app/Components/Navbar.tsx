@@ -87,7 +87,11 @@ export default function Navbar() {
   }
 
   return (
-    <header className="navbar">
+  <header
+  className={`navbar ${
+    user?.role === "admin" ? "admin-navbar" : "user-navbar"
+  }`}
+>
       <a href="/" className="brand" aria-label="FraudShield home">
         <span className="brand-icon">🛡️</span>
         <span>

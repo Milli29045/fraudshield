@@ -2,13 +2,13 @@
 import { NextResponse } from "next/server";
 import { prisma } from "../../lib/prisma";
 import { analyzeSentiment } from "../../lib/sentiment";
-import { requireAdmin } from "../../lib/auth";
-import { getCurrentUser } from "../../lib/auth";
+import { requireAdmin, getCurrentUser } from "../../lib/auth";
+
 export async function GET(request: Request) {
   try {
     const user = await getCurrentUser();
+    const isAdmin = user?.role === "admin";
 
-const isAdmin = user?.role === "admin";
     const { searchParams } = new URL(request.url);
     const appIdParam = searchParams.get("appId");
 
@@ -26,10 +26,10 @@ const isAdmin = user?.role === "admin";
     }
 
     const reviews = await prisma.review.findMany({
-     where: {
-  ...(appId !== undefined ? { appId } : {}),
-  ...(isAdmin ? {} : { status: "approved" }),
-},
+      where: {
+        ...(appId !== undefined ? { appId } : {}),
+        ...(isAdmin ? {} : { status: "approved" }),
+      },
       include: {
         app: {
           select: {
@@ -53,18 +53,17 @@ const isAdmin = user?.role === "admin";
   }
 }
 
-
 export async function POST(request: Request) {
-                                             
-  const user = await getCurrentUser();
-
-  if (!user) {
-    return NextResponse.json(
-      { error: "Please login before submitting a review." },
-      { status: 401 }
-    );
-  }
   try {
+    const user = await getCurrentUser();
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "Please login before submitting a review." },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
 
     const content =
@@ -81,7 +80,7 @@ export async function POST(request: Request) {
 
     if (!Number.isInteger(appId) || appId <= 0) {
       return NextResponse.json(
-        { error: "A valid appId is required." },
+        { error: "A valid app ID is required." },
         { status: 400 }
       );
     }
@@ -93,54 +92,75 @@ export async function POST(request: Request) {
 
     if (!app) {
       return NextResponse.json(
-        { error: "App not found. Please create an app first." },
+        { error: "App not found." },
         { status: 404 }
       );
     }
 
-const sentiment = analyzeSentiment(content);
+    const existingReview = await prisma.review.findFirst({
+      where: {
+        appId,
+        content: {
+          equals: content,
+          mode: "insensitive",
+        },
+      },
+    });
 
-const review = await prisma.review.create({
-  data: {
-    content,
-    appId,
-    sentiment,
-  },
-});
+    const sentiment = analyzeSentiment(content);
+
+    const review = await prisma.review.create({
+      data: {
+        content,
+        appId,
+        sentiment,
+        status: existingReview ? "duplicate" : "pending",
+      },
+    });
 
     return NextResponse.json(
-      { message: "Review saved successfully.", review },
+      {
+        message: existingReview
+          ? "Duplicate review detected. It has been flagged for admin review."
+          : "Review saved successfully.",
+        review,
+      },
       { status: 201 }
     );
   } catch (error) {
     console.error("Review API error:", error);
 
     return NextResponse.json(
-      { error: "Unable to save review. Check the terminal." },
+      { error: "Unable to save review." },
       { status: 500 }
     );
   }
 }
 
 export async function PATCH(request: Request) {
-   const auth = await requireAdmin();
-
-  if (auth.response) {
-    return auth.response;
-  }
   try {
+    const auth = await requireAdmin();
+
+    if (auth.response) {
+      return auth.response;
+    }
+
     const body = await request.json();
+
     const id = Number(body.id);
     const status = body.status;
 
     if (!Number.isInteger(id) || id <= 0) {
       return NextResponse.json(
-        { error: "Valid review ID required." },
+        { error: "A valid review ID is required." },
         { status: 400 }
       );
     }
 
-    if (!["approved", "rejected"].includes(status)) {
+    if (
+      typeof status !== "string" ||
+      !["approved", "rejected"].includes(status)
+    ) {
       return NextResponse.json(
         { error: "Status must be approved or rejected." },
         { status: 400 }

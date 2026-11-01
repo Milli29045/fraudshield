@@ -1234,3 +1234,67 @@ div[class*="netlify"] {
     gap: 10px;
   }
 }
+ 
+
+
+/* Admin Navbar - No Overlapping */
+
+@media (min-width: 1101px) {
+  .admin-navbar {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    gap: 12px !important;
+    padding: 12px 20px !important;
+  }
+
+  .admin-navbar .brand {
+    flex: 0 0 auto !important;
+    margin: 0 !important;
+    font-size: 21px !important;
+  }
+
+  .admin-navbar .nav-links {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    width: 0 !important;
+    margin: 0 !important;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    justify-content: center !important;
+    gap: 12px !important;
+    overflow-x: auto !important;
+    scrollbar-width: none;
+  }
+
+  .admin-navbar .nav-links::-webkit-scrollbar {
+    display: none;
+  }
+
+  .admin-navbar .nav-item {
+    flex: 0 0 auto !important;
+    font-size: 11px !important;
+    white-space: nowrap !important;
+    gap: 4px !important;
+  }
+
+  .admin-navbar .nav-actions {
+    flex: 0 0 auto !important;
+    margin: 0 !important;
+    gap: 7px !important;
+  }
+
+  .admin-navbar .admin-link {
+    white-space: nowrap !important;
+  }
+
+  .admin-navbar .welcome-capsule {
+    padding: 9px 10px !important;
+    font-size: 10px !important;
+  }
+
+  .admin-navbar .logout-button {
+    padding: 9px 11px !important;
+    font-size: 11px !important;
+  }
+}

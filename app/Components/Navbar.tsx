@@ -10,6 +10,7 @@ import {
   Settings,
   ShieldCheck,
   MessageCircle,
+    History,
   LogOut,
 } from "lucide-react";
 type User = {
@@ -24,7 +25,8 @@ const navItems = [
   { label: "Submit Review", href: "/submit-review", icon: Star },
   { label: "Features", href: "/#features", icon: LayoutGrid },
   { label: "How It Works", href: "/#how-it-works", icon: Settings },
-  { label: "App Checker", href: "/#checker", icon: ShieldCheck },
+  { label: "App Checker", href: "/app-checker", icon: ShieldCheck },
+  { label: "Detection History", href: "/detection-history", icon: History },
   { label: "Apps", href: "/apps", icon: LayoutGrid },
   { label: "Reviews", href: "/reviews", icon: MessageCircle },
 ];

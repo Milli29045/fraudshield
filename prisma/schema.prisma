@@ -38,4 +38,16 @@ model User {
   passwordHash String
   role         String   @default("user")
   createdAt    DateTime @default(now())
+   detectionHistory DetectionHistory[]
+}
+model DetectionHistory {
+  id          Int      @id @default(autoincrement())
+  type        String
+  inputValue  String
+  riskLevel   String
+  result      String
+  createdAt   DateTime @default(now())
+
+  userId      Int?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
 }

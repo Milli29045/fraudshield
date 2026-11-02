@@ -9,8 +9,9 @@ export default function Checker() {
   const [mode, setMode] = useState<CheckMode>("Phone Number");
   const [value, setValue] = useState("");
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  function handleCheck(event: FormEvent<HTMLFormElement>) {
+  async function handleCheck(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     if (!value.trim()) {
@@ -18,9 +19,48 @@ export default function Checker() {
       return;
     }
 
-    setMessage(
-      "Demo only: No fraud analysis has been performed. Sentiment analysis and real detection will be added after backend integration."
-    );
+    setLoading(true);
+    setMessage("");
+
+    const type =
+      mode === "Phone Number"
+        ? "phone"
+        : mode === "Email Address"
+          ? "email"
+          : "message";
+
+    try {
+      const response = await fetch("/api/checker", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          type,
+          value: value.trim(),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || data.error || "Detection failed.");
+      }
+
+      setMessage(
+        data.message ||
+        data.result ||
+        `Risk Level: ${data.riskLevel || "Analysis completed"}`
+      );
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "Something went wrong. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
   }
 
   function changeMode(newMode: CheckMode) {
@@ -35,8 +75,8 @@ export default function Checker() {
         <span className="eyebrow">FRAUD AWARENESS TOOL</span>
         <h2>Check Suspicious Information</h2>
         <p>
-          Enter an app-related review, phone number, email,
-          or message to explore the demo interface.
+          Enter a phone number, email address, or suspicious
+          message to check for potential fraud indicators.
         </p>
       </div>
 
@@ -50,6 +90,7 @@ export default function Checker() {
               type="button"
               className={`tab-button ${mode === item ? "active" : ""}`}
               onClick={() => changeMode(item)}
+              disabled={loading}
             >
               {item}
             </button>
@@ -71,12 +112,13 @@ export default function Checker() {
               rows={4}
               value={value}
               onChange={(event) => setValue(event.target.value)}
-              placeholder="Enter an app review or suspicious message..."
+              placeholder="Enter a suspicious message..."
+              disabled={loading}
             />
           ) : (
             <input
               id="check-input"
-              type={mode === "Email Address" ? "email" : "tel"}
+              type="text"
               value={value}
               onChange={(event) => setValue(event.target.value)}
               placeholder={
@@ -84,11 +126,16 @@ export default function Checker() {
                   ? "Enter a phone number"
                   : "Enter an email address"
               }
+              disabled={loading}
             />
           )}
 
-          <button className="primary-button check-button" type="submit">
-            Explore Demo →
+          <button
+            className="primary-button check-button"
+            type="submit"
+            disabled={loading}
+          >
+            {loading ? "Checking..." : "Check Now →"}
           </button>
 
           {message && (
@@ -98,8 +145,9 @@ export default function Checker() {
           )}
 
           <p className="privacy-note">
-            Demo only. Do not enter private information. This tool
-            does not currently verify fraud or analyze sentiment.
+            This tool checks for potential fraud indicators.
+            Results are not a guarantee that information is safe.
+            Avoid entering private or sensitive information.
           </p>
         </form>
       </div>

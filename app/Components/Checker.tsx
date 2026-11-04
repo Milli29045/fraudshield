@@ -2,8 +2,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-
-type CheckMode = "Phone Number" | "Email Address" | "Message";
+type CheckMode = "Phone Number" | "Email Address" | "Message" | "Website URL";
 
 export default function Checker() {
   const [mode, setMode] = useState<CheckMode>("Phone Number");
@@ -22,13 +21,14 @@ export default function Checker() {
     setLoading(true);
     setMessage("");
 
-    const type =
-      mode === "Phone Number"
-        ? "phone"
-        : mode === "Email Address"
-          ? "email"
-          : "message";
-
+const type =
+  mode === "Phone Number"
+    ? "phone"
+    : mode === "Email Address"
+      ? "email"
+      : mode === "Website URL"
+        ? "url"
+        : "message";
     try {
       const response = await fetch("/api/checker", {
         method: "POST",
@@ -83,7 +83,7 @@ export default function Checker() {
       <div className="checker-card">
         <div className="checker-tabs">
           {(
-            ["Phone Number", "Email Address", "Message"] as CheckMode[]
+["Phone Number", "Email Address", "Message", "Website URL"] as CheckMode[]
           ).map((item) => (
             <button
               key={item}
@@ -116,18 +116,20 @@ export default function Checker() {
               disabled={loading}
             />
           ) : (
-            <input
-              id="check-input"
-              type="text"
-              value={value}
-              onChange={(event) => setValue(event.target.value)}
-              placeholder={
-                mode === "Phone Number"
-                  ? "Enter a phone number"
-                  : "Enter an email address"
-              }
-              disabled={loading}
-            />
+       <input
+  id="check-input"
+  type="text"
+  value={value}
+  onChange={(event) => setValue(event.target.value)}
+  placeholder={
+    mode === "Phone Number"
+      ? "Enter a phone number"
+      : mode === "Email Address"
+        ? "Enter an email address"
+        : "Enter a website URL"
+  }
+  disabled={loading}
+/>
           )}
 
           <button

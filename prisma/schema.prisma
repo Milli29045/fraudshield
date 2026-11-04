@@ -39,6 +39,7 @@ model User {
   role         String   @default("user")
   createdAt    DateTime @default(now())
    detectionHistory DetectionHistory[]
+   fraudReports FraudReport[]
 }
 model DetectionHistory {
   id          Int      @id @default(autoincrement())
@@ -50,4 +51,17 @@ model DetectionHistory {
 
   userId      Int?
   user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+model FraudReport {
+  id            Int      @id @default(autoincrement())
+  type          String
+  reportedValue String
+  category      String
+  description   String?
+  status        String   @default("pending")
+  createdAt     DateTime @default(now())
+
+  userId        Int?
+  user          User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
 }

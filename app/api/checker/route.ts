@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "../../lib/prisma";
 
-type CheckType = "app" | "phone" | "email" | "message";
+type CheckType = "app" | "phone" | "email" | "message" | "url";
 
 
 const suspiciousPatterns = [
@@ -49,13 +49,13 @@ export async function POST(request: NextRequest) {
     const value =
       typeof body.value === "string" ? body.value.trim() : "";
 
-    const allowedTypes: CheckType[] = [
-      "app",
-      "phone",
-      "email",
-      "message",
-    ];
-
+const allowedTypes: CheckType[] = [
+  "app",
+  "phone",
+  "email",
+  "message",
+  "url",
+];
     if (!allowedTypes.includes(type)) {
       return NextResponse.json(
         { error: "Invalid detection type." },
@@ -72,6 +72,98 @@ export async function POST(request: NextRequest) {
 
     let riskLevel = "Needs Verification";
     let message = "";
+
+    // URL and phishing detection
+    if (type === "url") {
+      let checkedUrl: URL;
+
+      try {
+        const inputUrl = /^https?:\/\//i.test(value)
+          ? value
+          : `https://${value}`;
+
+        checkedUrl = new URL(inputUrl);
+
+        if (
+          !["http:", "https:"].includes(checkedUrl.protocol) ||
+          !checkedUrl.hostname.includes(".") ||
+          checkedUrl.username ||
+          checkedUrl.password
+        ) {
+          throw new Error("Invalid URL");
+        }
+      } catch {
+        return NextResponse.json(
+          { error: "Please enter a valid website URL." },
+          { status: 400 }
+        );
+      }
+
+      const apiKey = process.env.GOOGLE_SAFE_BROWSING_API_KEY;
+
+      if (!apiKey) {
+        return NextResponse.json(
+          { error: "URL security service is not configured." },
+          { status: 503 }
+        );
+      }
+
+      const googleResponse = await fetch(
+        `https://safebrowsing.googleapis.com/v4/threatMatches:find?key=${encodeURIComponent(apiKey)}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            client: {
+              clientId: "fraudshield",
+              clientVersion: "1.0.0",
+            },
+            threatInfo: {
+              threatTypes: [
+                "MALWARE",
+                "SOCIAL_ENGINEERING",
+                "UNWANTED_SOFTWARE",
+              ],
+              platformTypes: ["ANY_PLATFORM"],
+              threatEntryTypes: ["URL"],
+              threatEntries: [
+                { url: checkedUrl.toString() },
+              ],
+            },
+          }),
+          cache: "no-store",
+        }
+      );
+
+      if (!googleResponse.ok) {
+        console.error(
+          "Google Safe Browsing error:",
+          googleResponse.status
+        );
+
+        return NextResponse.json(
+          { error: "URL security verification is temporarily unavailable." },
+          { status: 502 }
+        );
+      }
+
+      const googleData = await googleResponse.json();
+      const matches = googleData.matches || [];
+
+      if (matches.length > 0) {
+        riskLevel = "High Suspicion";
+        message =
+          "Warning: Google Safe Browsing identified this URL as a known threat. Avoid opening it or sharing personal information.";
+      } else {
+        riskLevel = "No Known Threat Found";
+        message =
+          "Google Safe Browsing did not identify this URL as a known threat. This does not guarantee that the website is safe.";
+      }
+    }
+
+    
 
     // Phone number checking
     if (type === "phone") {

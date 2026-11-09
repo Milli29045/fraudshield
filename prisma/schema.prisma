@@ -40,6 +40,8 @@ model User {
   createdAt    DateTime @default(now())
    detectionHistory DetectionHistory[]
    fraudReports FraudReport[]
+   chatParticipants ChatParticipant[]
+sentMessages     ChatMessage[]
 }
 model DetectionHistory {
   id          Int      @id @default(autoincrement())
@@ -64,4 +66,42 @@ model FraudReport {
 
   userId        Int?
   user          User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+model ChatRoom {
+  id           Int      @id @default(autoincrement())
+  name         String?
+  type         String   @default("community")
+  createdAt    DateTime @default(now())
+
+  participants ChatParticipant[]
+  messages     ChatMessage[]
+}
+
+model ChatParticipant {
+  id       Int      @id @default(autoincrement())
+  joinedAt DateTime @default(now())
+
+  roomId   Int
+  userId   Int
+
+  room     ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([roomId, userId])
+}
+
+model ChatMessage {
+  id        Int      @id @default(autoincrement())
+  content   String
+  createdAt DateTime @default(now())
+  roomId    Int
+  senderId  Int
+
+  isDeleted Boolean  @default(false)
+  deletedAt DateTime?
+
+  room      ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  sender    User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([roomId, createdAt])
 }

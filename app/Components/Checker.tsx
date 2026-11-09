@@ -2,7 +2,22 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-type CheckMode = "Phone Number" | "Email Address" | "Message" | "Website URL";
+
+type CheckMode =
+  | "Phone Number"
+  | "Email Address"
+  | "Message"
+  | "Website URL";
+
+type ApiResult = {
+  success?: boolean;
+  error?: string;
+  message?: string;
+  result?: string;
+  riskLevel?: string;
+  checks?: Record<string, unknown>;
+  note?: string;
+};
 
 export default function Checker() {
   const [mode, setMode] = useState<CheckMode>("Phone Number");
@@ -21,37 +36,90 @@ export default function Checker() {
     setLoading(true);
     setMessage("");
 
-const type =
-  mode === "Phone Number"
-    ? "phone"
-    : mode === "Email Address"
-      ? "email"
-      : mode === "Website URL"
-        ? "url"
-        : "message";
     try {
-      const response = await fetch("/api/checker", {
+      let endpoint = "/api/checker";
+
+      let requestBody: Record<string, string> = {
+        type: "",
+        value: value.trim(),
+      };
+
+      if (mode === "Phone Number") {
+        endpoint = "/api/check-phone";
+        requestBody = {
+          phone: value.trim(),
+        };
+      } else if (mode === "Email Address") {
+        endpoint = "/api/check-email";
+        requestBody = {
+          email: value.trim(),
+        };
+      } else if (mode === "Website URL") {
+        endpoint = "/api/check-website";
+        requestBody = {
+          url: value.trim(),
+        };
+      } else {
+        requestBody.type = "message";
+      }
+
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          type,
-          value: value.trim(),
-        }),
+        body: JSON.stringify(requestBody),
       });
 
-      const data = await response.json();
+      const data = (await response.json()) as ApiResult;
 
       if (!response.ok) {
-        throw new Error(data.message || data.error || "Detection failed.");
+        throw new Error(
+          data.error || data.message || "Detection failed."
+        );
       }
 
-      setMessage(
-        data.message ||
-        data.result ||
-        `Risk Level: ${data.riskLevel || "Analysis completed"}`
-      );
+      const lines: string[] = [];
+
+      lines.push(`Risk Level: ${data.riskLevel || "Unknown"}`);
+
+   if (data.result || data.message) {
+  lines.push(`Result: ${data.result || data.message}`);
+}
+      if (data.checks) {
+        lines.push("");
+        lines.push("Verification Details:");
+
+        Object.entries(data.checks).forEach(([key, item]) => {
+          if (
+            item !== null &&
+            item !== undefined &&
+            item !== ""
+          ) {
+            const label = key
+              .replace(/([A-Z])/g, " $1")
+              .replace(/^./, (char) => char.toUpperCase());
+
+            const displayValue =
+              Array.isArray(item)
+                ? item.length > 0
+                  ? item.join(", ")
+                  : "None"
+                : typeof item === "object"
+                  ? JSON.stringify(item)
+                  : String(item);
+
+            lines.push(`${label}: ${displayValue}`);
+          }
+        });
+      }
+
+      if (data.note) {
+        lines.push("");
+        lines.push(data.note);
+      }
+
+      setMessage(lines.join("\n"));
     } catch (error) {
       setMessage(
         error instanceof Error
@@ -73,22 +141,31 @@ const type =
     <section className="checker-section" id="checker">
       <div className="section-heading">
         <span className="eyebrow">FRAUD AWARENESS TOOL</span>
+
         <h2>Check Suspicious Information</h2>
+
         <p>
-          Enter a phone number, email address, or suspicious
-          message to check for potential fraud indicators.
+          Enter a phone number, email address, website URL,
+          or suspicious message to check for potential fraud indicators.
         </p>
       </div>
 
       <div className="checker-card">
         <div className="checker-tabs">
           {(
-["Phone Number", "Email Address", "Message", "Website URL"] as CheckMode[]
+            [
+              "Phone Number",
+              "Email Address",
+              "Message",
+              "Website URL",
+            ] as CheckMode[]
           ).map((item) => (
             <button
               key={item}
               type="button"
-              className={`tab-button ${mode === item ? "active" : ""}`}
+              className={`tab-button ${
+                mode === item ? "active" : ""
+              }`}
               onClick={() => changeMode(item)}
               disabled={loading}
             >
@@ -103,7 +180,9 @@ const type =
               ? "Phone number"
               : mode === "Email Address"
                 ? "Email address"
-                : "Message or app review"}
+                : mode === "Website URL"
+                  ? "Website URL"
+                  : "Suspicious message"}
           </label>
 
           {mode === "Message" ? (
@@ -116,20 +195,20 @@ const type =
               disabled={loading}
             />
           ) : (
-       <input
-  id="check-input"
-  type="text"
-  value={value}
-  onChange={(event) => setValue(event.target.value)}
-  placeholder={
-    mode === "Phone Number"
-      ? "Enter a phone number"
-      : mode === "Email Address"
-        ? "Enter an email address"
-        : "Enter a website URL"
-  }
-  disabled={loading}
-/>
+            <input
+              id="check-input"
+              type="text"
+              value={value}
+              onChange={(event) => setValue(event.target.value)}
+              placeholder={
+                mode === "Phone Number"
+                  ? "Enter a phone number"
+                  : mode === "Email Address"
+                    ? "Enter an email address"
+                    : "Enter a website URL"
+              }
+              disabled={loading}
+            />
           )}
 
           <button
@@ -141,7 +220,11 @@ const type =
           </button>
 
           {message && (
-            <p className="demo-message" role="status">
+            <p
+              className="demo-message"
+              role="status"
+              style={{ whiteSpace: "pre-line" }}
+            >
               {message}
             </p>
           )}

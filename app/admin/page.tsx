@@ -26,6 +26,20 @@ type Review = {
   };
 };
 
+type FraudReport = {
+  id: number;
+  type: string;
+  reportedValue: string;
+  category: string;
+  description: string | null;
+  status: string;
+  createdAt: string;
+  user: {
+    name: string;
+    email: string;
+  } | null;
+};
+
 const buttonStyle = {
   padding: "10px 14px",
   border: "none",
@@ -47,6 +61,8 @@ const formInputStyle = {
 export default function AdminPage() {
   const [apps, setApps] = useState<AppItem[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [reports, setReports] = useState<FraudReport[]>([]);
+const [updatingReportId, setUpdatingReportId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
@@ -63,14 +79,17 @@ export default function AdminPage() {
     setError("");
 
     try {
-      const [appsResponse, reviewsResponse] = await Promise.all([
-        fetch("/api/apps"),
-        fetch("/api/reviews"),
-      ]);
+   
+const [appsResponse, reviewsResponse, reportsResponse] =
+  await Promise.all([
+    fetch("/api/apps"),
+    fetch("/api/reviews"),
+    fetch("/api/reports"),
+  ]);
 
       const appsData = await appsResponse.json();
       const reviewsData = await reviewsResponse.json();
-
+const reportsData = await reportsResponse.json();
       if (!appsResponse.ok) {
         throw new Error(appsData.error || "Unable to load apps.");
       }
@@ -81,6 +100,13 @@ export default function AdminPage() {
 
       setApps(appsData.apps);
       setReviews(reviewsData.reviews);
+      if (!reportsResponse.ok) {
+  throw new Error(
+    reportsData.message || "Unable to load fraud reports."
+  );
+}
+
+setReports(reportsData.reports || []);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Something went wrong."
@@ -124,6 +150,37 @@ export default function AdminPage() {
       setUpdatingId(null);
     }
   }
+
+async function updateReportStatus(id: number, status: "approved" | "rejected") {
+  setUpdatingReportId(id);
+  setError("");
+  setMessage("");
+
+  try {
+    const response = await fetch(`/api/reports/${id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ status }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Unable to update report.");
+    }
+
+    setMessage(`Report #${id} has been ${status}.`);
+    await loadData();
+  } catch (err) {
+    setError(
+      err instanceof Error ? err.message : "Something went wrong."
+    );
+  } finally {
+    setUpdatingReportId(null);
+  }
+}
 
   async function updateAppStatus(id: number, fraudStatus: string) {
     setUpdatingAppId(id);
@@ -473,6 +530,156 @@ async function addApp(event: FormEvent<HTMLFormElement>) {
         </section>
 
         <section style={{ marginTop: "42px" }}>
+          
+<section style={{ marginTop: "42px" }}>
+  <h2 style={{ fontSize: "24px", marginBottom: "16px" }}>
+    Fraud Reports Management
+  </h2>
+
+  <div
+    style={{
+      display: "flex",
+      flexWrap: "wrap",
+      gap: "12px",
+      marginBottom: "20px",
+    }}
+  >
+    <div style={{ ...cardStyle, flex: "1 1 150px" }}>
+      <h3>Pending Reports</h3>
+      <p style={{ fontSize: "28px", fontWeight: 700, color: "#a16207" }}>
+        {reports.filter((r) => r.status === "pending").length}
+      </p>
+    </div>
+
+    <div style={{ ...cardStyle, flex: "1 1 150px" }}>
+      <h3>Approved Reports</h3>
+      <p style={{ fontSize: "28px", fontWeight: 700, color: "#15803d" }}>
+        {reports.filter((r) => r.status === "approved").length}
+      </p>
+    </div>
+
+    <div style={{ ...cardStyle, flex: "1 1 150px" }}>
+      <h3>Rejected Reports</h3>
+      <p style={{ fontSize: "28px", fontWeight: 700, color: "#b91c1c" }}>
+        {reports.filter((r) => r.status === "rejected").length}
+      </p>
+    </div>
+  </div>
+
+  {!loading && reports.length === 0 && (
+    <p>No fraud reports have been submitted yet.</p>
+  )}
+
+  {reports.map((report) => (
+    <article key={report.id} style={cardStyle}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          flexWrap: "wrap",
+          gap: "12px",
+        }}
+      >
+        <div>
+          <h3 style={{ fontSize: "20px", marginBottom: "10px" }}>
+            {report.type === "phone"
+              ? "Suspicious Phone Number"
+              : report.type === "email"
+                ? "Spam Email"
+                : "Suspicious Website"}
+          </h3>
+
+          <p style={{ fontWeight: 700, fontSize: "17px" }}>
+            {report.reportedValue}
+          </p>
+
+          <p>
+            <strong>Report ID:</strong> {report.id}
+          </p>
+
+          <p>
+            <strong>Category:</strong> {report.category}
+          </p>
+
+          <p>
+            <strong>Description:</strong>{" "}
+            {report.description || "No description provided."}
+          </p>
+
+          <p>
+            <strong>Submitted by:</strong>{" "}
+            {report.user?.name || "Unknown User"}
+          </p>
+
+          <p>
+            <strong>Email:</strong>{" "}
+            {report.user?.email || "Not available"}
+          </p>
+
+          <p>
+            <strong>Date:</strong>{" "}
+            {new Date(report.createdAt).toLocaleString()}
+          </p>
+        </div>
+
+        <span
+          style={{
+            ...statusColor(report.status),
+            padding: "7px 12px",
+            borderRadius: "20px",
+            fontSize: "13px",
+            fontWeight: 700,
+            height: "fit-content",
+          }}
+        >
+          {report.status.toUpperCase()}
+        </span>
+      </div>
+
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "10px",
+          marginTop: "18px",
+        }}
+      >
+        <button
+          disabled={
+            updatingReportId !== null || report.status === "approved"
+          }
+          onClick={() =>
+            void updateReportStatus(report.id, "approved")
+          }
+          style={{
+            ...buttonStyle,
+            background: "#15803d",
+            opacity: updatingReportId !== null || report.status === "approved" ? 0.6 : 1,
+          }}
+        >
+          {updatingReportId === report.id ? "Updating..." : "Approve"}
+        </button>
+
+        <button
+          disabled={
+            updatingReportId !== null || report.status === "rejected"
+          }
+          onClick={() =>
+            void updateReportStatus(report.id, "rejected")
+          }
+          style={{
+            ...buttonStyle,
+            background: "#b91c1c",
+            opacity: updatingReportId !== null || report.status === "rejected" ? 0.6 : 1,
+          }}
+        >
+          {updatingReportId === report.id ? "Updating..." : "Reject"}
+        </button>
+      </div>
+    </article>
+  ))}
+</section>
+
           <h2 style={{ fontSize: "24px", marginBottom: "16px" }}>
             Review Management
           </h2>

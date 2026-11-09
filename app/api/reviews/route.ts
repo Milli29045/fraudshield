@@ -53,6 +53,7 @@ export async function GET(request: Request) {
   }
 }
 
+
 export async function POST(request: Request) {
   try {
     const user = await getCurrentUser();
@@ -69,7 +70,15 @@ export async function POST(request: Request) {
     const content =
       typeof body.content === "string" ? body.content.trim() : "";
 
-    const appId = Number(body.appId);
+    const appIdProvided =
+      body.appId !== undefined &&
+      body.appId !== null &&
+      body.appId !== "";
+
+    const appName =
+      typeof body.appName === "string"
+        ? body.appName.trim()
+        : "";
 
     if (!content || content.length > 5000) {
       return NextResponse.json(
@@ -78,28 +87,71 @@ export async function POST(request: Request) {
       );
     }
 
-    if (!Number.isInteger(appId) || appId <= 0) {
+    if (appIdProvided && appName) {
       return NextResponse.json(
-        { error: "A valid app ID is required." },
+        { error: "Provide either an app ID or an app name, not both." },
         { status: 400 }
       );
     }
 
-    const app = await prisma.app.findUnique({
-      where: { id: appId },
-      select: { id: true },
-    });
+    let app;
 
-    if (!app) {
-      return NextResponse.json(
-        { error: "App not found." },
-        { status: 404 }
-      );
+    if (appIdProvided) {
+      const appId = Number(body.appId);
+
+      if (!Number.isInteger(appId) || appId <= 0) {
+        return NextResponse.json(
+          { error: "A valid app ID is required." },
+          { status: 400 }
+        );
+      }
+
+      app = await prisma.app.findUnique({
+        where: { id: appId },
+        select: { id: true, name: true },
+      });
+
+      if (!app) {
+        return NextResponse.json(
+          { error: "App not found." },
+          { status: 404 }
+        );
+      }
+    } else {
+      if (!appName || appName.length > 150) {
+        return NextResponse.json(
+          { error: "A valid app name is required." },
+          { status: 400 }
+        );
+      }
+
+      const existingApp = await prisma.app.findFirst({
+        where: {
+          name: {
+            equals: appName,
+            mode: "insensitive",
+          },
+        },
+        select: { id: true, name: true },
+      });
+
+      app = existingApp;
+
+      if (!app) {
+        app = await prisma.app.create({
+          data: {
+            name: appName,
+            category: null,
+            fraudStatus: "Pending",
+          },
+          select: { id: true, name: true },
+        });
+      }
     }
 
     const existingReview = await prisma.review.findFirst({
       where: {
-        appId,
+        appId: app.id,
         content: {
           equals: content,
           mode: "insensitive",
@@ -112,7 +164,7 @@ export async function POST(request: Request) {
     const review = await prisma.review.create({
       data: {
         content,
-        appId,
+        appId: app.id,
         sentiment,
         status: existingReview ? "duplicate" : "pending",
       },
@@ -123,6 +175,8 @@ export async function POST(request: Request) {
         message: existingReview
           ? "Duplicate review detected. It has been flagged for admin review."
           : "Review saved successfully.",
+        app,
+        appCreated: !existingApp && !appIdProvided,
         review,
       },
       { status: 201 }
@@ -136,6 +190,7 @@ export async function POST(request: Request) {
     );
   }
 }
+
 
 export async function PATCH(request: Request) {
   try {

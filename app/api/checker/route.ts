@@ -41,6 +41,34 @@ const suspiciousPatterns = [
 ];
 
 
+function normalizeReportValue(type: string, value: string) {
+  const trimmed = value.trim();
+
+  if (type === "phone") {
+    return trimmed.replace(/\D/g, "");
+  }
+
+  if (type === "email") {
+    return trimmed.toLowerCase();
+  }
+
+  if (type === "url") {
+    try {
+      const url = new URL(
+        trimmed.startsWith("http") ? trimmed : `https://${trimmed}`
+      );
+
+      return `${url.hostname.toLowerCase()}${url.pathname.replace(/\/+$/, "")}`;
+    } catch {
+      return trimmed.toLowerCase()
+        .replace(/^https?:\/\//, "")
+        .replace(/\/+$/, "");
+    }
+  }
+
+  return trimmed.toLowerCase();
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -239,6 +267,65 @@ else if (type === "message") {
         "App name received successfully. Its authenticity cannot be confirmed using the app name alone. More information or a trusted app database is required.";
     }
 
+    // Search approved community fraud reports
+    let communityReports: {
+      id: number;
+      category: string;
+      description: string | null;
+      createdAt: Date;
+    }[] = [];
+
+    if (["phone", "email", "url"].includes(type)) {
+      const reportType = type === "url" ? "website" : type;
+      const searchValue = normalizeReportValue(type, value);
+
+      const approvedReports = await prisma.fraudReport.findMany({
+        where: {
+          type: reportType,
+          status: "approved",
+        },
+        select: {
+          id: true,
+          reportedValue: true,
+          category: true,
+          description: true,
+          createdAt: true,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+        take: 500,
+      });
+
+      communityReports = approvedReports
+        .filter(
+          (report) =>
+            normalizeReportValue(type, report.reportedValue) === searchValue
+        )
+        .map((report) => ({
+          id: report.id,
+          category: report.category,
+          description: report.description,
+          createdAt: report.createdAt,
+        }));
+
+      if (communityReports.length > 0) {
+        riskLevel = "Community Reports Found";
+
+        const categories = [
+          ...new Set(communityReports.map((report) => report.category)),
+        ];
+
+        message +=
+          ` Community reports found: ${communityReports.length} approved report(s). ` +
+          `Reported categories: ${categories.join(", ")}. ` +
+          "Review the reported information carefully. Community reports are not independent proof of fraud.";
+      } else {
+        message +=
+          " No approved community reports were found. This does not guarantee that the information is safe.";
+      }
+    }
+
     // Get logged-in user, if available
     let userId: number | null = null;
 
@@ -280,14 +367,17 @@ else if (type === "message") {
       },
     });
 
-    return NextResponse.json({
-      success: true,
-      detectionId: detection.id,
-      type,
-      riskLevel,
-      message,
-      checkedAt: detection.createdAt.toISOString(),
-    });
+  
+return NextResponse.json({
+  success: true,
+  detectionId: detection.id,
+  type,
+  riskLevel,
+  message,
+  communityReports,
+  checkedAt: detection.createdAt.toISOString(),
+});
+
   } catch (error) {
     console.error("Detection API error:", error);
 

@@ -125,27 +125,25 @@ export default function Navbar() {
     return navItems.map((item) => {
       const Icon = item.icon;
 
-      const isActive =
-        item.href === "/"
-          ? pathname === "/"
-          : pathname === item.href.split("#")[0];
-
       return (
         <Link
           key={item.href}
           href={item.href}
           onClick={mobile ? closeMobileMenu : undefined}
-          className={`flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold transition-colors ${
-            isActive
-              ? "bg-blue-50 text-blue-600"
-              : "text-slate-600 hover:bg-blue-50 hover:text-blue-600"
-          } ${mobile ? "w-full" : "shrink-0 whitespace-nowrap px-3 py-2 text-xs"}`}
+          className={`group flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold text-slate-600 transition-colors duration-200 hover:!text-blue-600 ${
+            mobile
+              ? "w-full"
+              : "shrink-0 whitespace-nowrap px-3 py-2 text-xs"
+          }`}
         >
           <Icon
             size={mobile ? 19 : 15}
-            className={isActive ? "text-blue-600" : "text-slate-400"}
+            className="shrink-0 text-slate-400 transition-colors duration-200 group-hover:!text-blue-600"
           />
-          <span>{item.label}</span>
+
+          <span className="transition-colors duration-200 group-hover:!text-blue-600">
+            {item.label}
+          </span>
         </Link>
       );
     });
@@ -153,7 +151,6 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-slate-200 bg-white shadow-md">
-
       <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
 
         {/* TOP BAR */}
@@ -224,10 +221,13 @@ export default function Navbar() {
                           setSearchQuery("");
                           setShowSearch(false);
                         }}
-                        className="flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-600"
+                        className="group flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium text-slate-700 transition-colors duration-200 hover:!text-blue-600"
                       >
-                        <Icon size={17} />
-                        {item.label}
+                        <Icon
+                          size={17}
+                          className="text-slate-400 transition-colors duration-200 group-hover:!text-blue-600"
+                        />
+                        <span>{item.label}</span>
                       </Link>
                     );
                   })
@@ -243,7 +243,6 @@ export default function Navbar() {
           {/* DESKTOP ACTIONS */}
 
           <div className="hidden shrink-0 items-center gap-2 md:flex">
-
             <Link
               href="/reports"
               className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-2.5 text-xs font-semibold text-white hover:bg-blue-700"
@@ -253,7 +252,9 @@ export default function Navbar() {
             </Link>
 
             {loading ? (
-              <span className="px-2 text-xs text-slate-400">Loading...</span>
+              <span className="px-2 text-xs text-slate-400">
+                Loading...
+              </span>
             ) : user ? (
               <>
                 {user.role === "admin" && (
@@ -303,7 +304,6 @@ export default function Navbar() {
           {/* MOBILE REPORT + MENU BUTTON */}
 
           <div className="flex shrink-0 items-center gap-2 md:hidden">
-
             <Link
               href="/reports"
               aria-label="Report Fraud"
@@ -373,10 +373,13 @@ export default function Navbar() {
                         key={item.href}
                         href={item.href}
                         onClick={closeMobileMenu}
-                        className="flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold text-slate-600 hover:bg-blue-50 hover:text-blue-600"
+                        className="group flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold text-slate-600 transition-colors duration-200 hover:!text-blue-600"
                       >
-                        <Icon size={19} />
-                        {item.label}
+                        <Icon
+                          size={19}
+                          className="text-slate-400 transition-colors duration-200 group-hover:!text-blue-600"
+                        />
+                        <span>{item.label}</span>
                       </Link>
                     );
                   })
@@ -386,14 +389,12 @@ export default function Navbar() {
             {/* MOBILE ACCOUNT ACTIONS */}
 
             <div className="mt-4 border-t border-slate-200 pt-4">
-
               {loading ? (
                 <p className="px-3 py-2 text-sm text-slate-400">
                   Loading account...
                 </p>
               ) : user ? (
                 <div className="flex flex-col gap-2">
-
                   <p className="px-3 py-2 text-sm text-slate-600">
                     Welcome, <strong>{user.name || "User"}</strong>
                   </p>
@@ -402,7 +403,7 @@ export default function Navbar() {
                     <Link
                       href="/admin"
                       onClick={closeMobileMenu}
-                      className="flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold text-blue-600 hover:bg-blue-50"
+                      className="flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-semibold text-blue-600 hover:text-blue-700"
                     >
                       <ShieldCheck size={19} />
                       Admin Panel
@@ -424,7 +425,7 @@ export default function Navbar() {
                   <Link
                     href="/login"
                     onClick={closeMobileMenu}
-                    className="rounded-lg border border-slate-200 px-3 py-3 text-center text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                    className="rounded-lg border border-slate-200 px-3 py-3 text-center text-sm font-semibold text-slate-700 hover:text-blue-600"
                   >
                     Login
                   </Link>

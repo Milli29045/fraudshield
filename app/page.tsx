@@ -423,9 +423,14 @@ async function handleAppSearch(event: FormEvent<HTMLFormElement>) {
     </p>
   </div>
 
-  <a href="#checker" className="cta-button">
-    Try the Demo →
-  </a>
+<a
+  href="/fraudshield-demo.mp4"
+  target="_blank"
+  rel="noopener noreferrer"
+  className="cta-button"
+>
+  Try the Demo →
+</a>
 </section>
   
     </main>

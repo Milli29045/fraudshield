@@ -139,7 +139,7 @@ export default function Footer() {
         <div className="mt-12 border-t border-white/10 pt-7">
           <div className="flex flex-col items-center justify-between gap-4 text-center sm:flex-row">
             <p className="text-xs text-gray-400">
-              © {new Date().getFullYear()} FraudShield. All rights reserved.
+              © 2026 FraudShield. All rights reserved.
             </p>
 
             <p className="text-xs text-gray-400">

@@ -176,7 +176,7 @@ export async function POST(request: Request) {
           ? "Duplicate review detected. It has been flagged for admin review."
           : "Review saved successfully.",
         app,
-        appCreated: !existingApp && !appIdProvided,
+      appCreated: false,
         review,
       },
       { status: 201 }

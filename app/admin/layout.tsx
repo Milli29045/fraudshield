@@ -1,8 +1,9 @@
 
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "../lib/auth";
 
-export default async function AdminLayout({
+async function AdminAuthGuard({
   children,
 }: {
   children: React.ReactNode;
@@ -20,3 +21,20 @@ export default async function AdminLayout({
   return <>{children}</>;
 }
 
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          Loading Admin Panel...
+        </div>
+      }
+    >
+      <AdminAuthGuard>{children}</AdminAuthGuard>
+    </Suspense>
+  );
+}

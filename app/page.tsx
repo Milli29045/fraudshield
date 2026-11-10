@@ -320,7 +320,7 @@ async function handleAppSearch(event: FormEvent<HTMLFormElement>) {
   <div className="relative mx-auto max-w-7xl">
 
     <div className="mb-16 text-center">
-      <span className="inline-block rounded-full border border-blue-400/30 bg-blue-500/10 px-5 py-2 text-xs font-bold tracking-widest text-blue-300">
+      <span className="inline-block rounded-full border border-blue-400/30 bg-blue-500/10 px-5 py-2 text-xs font-bold tracking-widest text-blue-100">
         HOW IT WORKS
       </span>
 
@@ -329,7 +329,7 @@ async function handleAppSearch(event: FormEvent<HTMLFormElement>) {
         <span className="text-blue-400"> 3 Simple Steps</span>
       </h2>
 
-      <p className="mx-auto mt-5 max-w-2xl text-sm leading-7 text-slate-400 sm:text-base">
+      <p className="mx-auto mt-5 max-w-2xl text-sm leading-7 text-slate-300 sm:text-base">
         FraudShield helps you make informed decisions before
         interacting with suspicious contacts and online platforms.
       </p>
@@ -337,19 +337,20 @@ async function handleAppSearch(event: FormEvent<HTMLFormElement>) {
 
     <div className="grid gap-7 md:grid-cols-3">
 
-      <article className="group rounded-3xl border border-white/10 bg-white/[0.04] p-8 transition duration-300 hover:-translate-y-2 hover:border-blue-400/50 hover:bg-white/[0.08]">
+      <article className="group rounded-3xl border border-white/15 bg-white/[0.06] p-8 transition duration-300 hover:-translate-y-2 hover:border-blue-400/50 hover:bg-white/[0.10]">
         <div className="flex items-center justify-between">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-500/15 text-3xl">
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-500/20 text-3xl">
             🔍
           </div>
-          <span className="text-5xl font-black text-white/10">01</span>
+          {/* Yahan opacity barha kar white kar diya hai */}
+          <span className="text-5xl font-black text-white/90">01</span>
         </div>
 
         <h3 className="mt-8 text-xl font-bold text-white">
           Enter Information
         </h3>
 
-        <p className="mt-4 text-sm leading-7 text-slate-400">
+        <p className="mt-4 text-sm leading-7 text-slate-300">
           Enter a suspicious phone number, email address,
           website link or message into the FraudShield checker.
         </p>
@@ -357,19 +358,19 @@ async function handleAppSearch(event: FormEvent<HTMLFormElement>) {
         <div className="mt-7 h-1 w-12 rounded-full bg-blue-500 transition-all group-hover:w-20" />
       </article>
 
-      <article className="group rounded-3xl border border-white/10 bg-white/[0.04] p-8 transition duration-300 hover:-translate-y-2 hover:border-blue-400/50 hover:bg-white/[0.08]">
+      <article className="group rounded-3xl border border-white/15 bg-white/[0.06] p-8 transition duration-300 hover:-translate-y-2 hover:border-blue-400/50 hover:bg-white/[0.10]">
         <div className="flex items-center justify-between">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-500/15 text-3xl">
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-500/20 text-3xl">
             🛡️
           </div>
-          <span className="text-5xl font-black text-white/10">02</span>
+          <span className="text-5xl font-black text-white/90">02</span>
         </div>
 
         <h3 className="mt-8 text-xl font-bold text-white">
           Analyze the Results
         </h3>
 
-        <p className="mt-4 text-sm leading-7 text-slate-400">
+        <p className="mt-4 text-sm leading-7 text-slate-300">
           FraudShield analyzes the submitted information
           and helps identify possible suspicious activity.
         </p>
@@ -377,19 +378,19 @@ async function handleAppSearch(event: FormEvent<HTMLFormElement>) {
         <div className="mt-7 h-1 w-12 rounded-full bg-indigo-500 transition-all group-hover:w-20" />
       </article>
 
-      <article className="group rounded-3xl border border-white/10 bg-white/[0.04] p-8 transition duration-300 hover:-translate-y-2 hover:border-blue-400/50 hover:bg-white/[0.08]">
+      <article className="group rounded-3xl border border-white/15 bg-white/[0.06] p-8 transition duration-300 hover:-translate-y-2 hover:border-blue-400/50 hover:bg-white/[0.10]">
         <div className="flex items-center justify-between">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500/15 text-3xl">
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500/20 text-3xl">
             ✅
           </div>
-          <span className="text-5xl font-black text-white/10">03</span>
+          <span className="text-5xl font-black text-white/90">03</span>
         </div>
 
         <h3 className="mt-8 text-xl font-bold text-white">
           Stay Protected
         </h3>
 
-        <p className="mt-4 text-sm leading-7 text-slate-400">
+        <p className="mt-4 text-sm leading-7 text-slate-300">
           Review the available findings and use caution
           before responding to suspicious contacts or links.
         </p>
@@ -402,7 +403,7 @@ async function handleAppSearch(event: FormEvent<HTMLFormElement>) {
     <div className="mt-12 text-center">
       <a
         href="#checker"
-        className="inline-flex items-center gap-3 rounded-xl bg-blue-600 px-8 py-4 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700"
+        className="inline-flex items-center gap-3 rounded-xl bg-blue-600 px-8 py-4 text-sm font-bold !text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700"
       >
         Try FraudShield Now →
       </a>
@@ -410,7 +411,6 @@ async function handleAppSearch(event: FormEvent<HTMLFormElement>) {
 
   </div>
 </section>
-
 <Checker />
     
 <section className="cta-section">

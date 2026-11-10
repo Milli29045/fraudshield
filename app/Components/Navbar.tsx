@@ -245,7 +245,7 @@ export default function Navbar() {
           <div className="hidden shrink-0 items-center gap-2 md:flex">
             <Link
               href="/reports"
-              className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-2.5 text-xs font-semibold text-white hover:bg-blue-700"
+              className="flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-2.5 text-xs font-semibold !text-white hover:bg-blue-700"
             >
               <Flag size={15} />
               Report Fraud
@@ -284,15 +284,16 @@ export default function Navbar() {
               </>
             ) : (
               <>
-            <Link
+ <Link
   href="/login"
-  className="rounded-lg px-3 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-colors"
+  onClick={closeMobileMenu}
+  className="rounded-lg bg-blue-600 px-3 py-2 text-center text-sm font-semibold !text-white hover:bg-blue-700 transition-colors"
 >
   Login
 </Link>
                 <Link
                   href="/register"
-                  className="rounded-lg bg-blue-600 px-3.5 py-2.5 text-xs font-semibold text-white hover:bg-blue-700"
+                  className="rounded-lg bg-blue-600 px-3.5 py-2.5 text-xs font-semibold !text-white hover:bg-blue-700"
                 >
                   Register
                 </Link>

@@ -284,13 +284,12 @@ export default function Navbar() {
               </>
             ) : (
               <>
-                <Link
-                  href="/login"
-                  className="rounded-lg px-3 py-2 text-xs font-semibold text-slate-600 hover:text-blue-600"
-                >
-                  Login
-                </Link>
-
+            <Link
+  href="/login"
+  className="rounded-lg px-3 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-colors"
+>
+  Login
+</Link>
                 <Link
                   href="/register"
                   className="rounded-lg bg-blue-600 px-3.5 py-2.5 text-xs font-semibold text-white hover:bg-blue-700"
@@ -446,3 +445,4 @@ export default function Navbar() {
     </header>
   );
 }
+
